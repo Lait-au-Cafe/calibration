@@ -1,11 +1,13 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
-#include <opencv2\opencv.hpp>
+#include <opencv2/opencv.hpp>
 
-#define PAT_ROW 5 // number of rows
-#define PAT_COL 8 // number of columns
-#define CHESS_SIZE 24.0
+#define PAT_ROW 7			// number of rows
+#define PAT_COL 11			// number of columns
+#define CHESS_SIZE 30.0		// [mm]
+
+using uint = unsigned int;
 
 int main() {
 	// prepare video capture
@@ -20,7 +22,7 @@ int main() {
 	cv::namedWindow(windowName, CV_WINDOW_AUTOSIZE);
 
 	std::cout << "Press enter to capture frame. " << std::endl;
-	std::cout << "Press 'q' to quit capturing. " << std::endl;
+	std::cout << "Press 'q' to quit capturing and begin processing. " << std::endl;
 
 	// collect corners
 	cv::Size patt_size(PAT_COL, PAT_ROW);
@@ -42,7 +44,7 @@ int main() {
 
 		if (found) {
 			std::cout << "Chessboard is found. "
-				<< "  Count : "
+				<< "  Count : " << img_points.size() + 1
 				<< std::endl;
 		}
 		else {
@@ -65,7 +67,7 @@ int main() {
 	}
 
 	// initialize coordinate
-	std::vector<cv::Point3d> object;
+	std::vector<cv::Point3f> object;
 	for (int row = 0; row < PAT_ROW; row++) {
 		for (int col = 0; col < PAT_COL; col++) {
 			cv::Point3d p(
@@ -75,8 +77,8 @@ int main() {
 			object.push_back(p);
 		}
 	}
-	std::vector<std::vector<cv::Point3d>> obj_points;
-	for (int n = 0; n < img_points.size(); n++) {
+	std::vector<std::vector<cv::Point3f>> obj_points;
+	for (uint n = 0; n < img_points.size(); n++) {
 		obj_points.push_back(object);
 	}
 	
