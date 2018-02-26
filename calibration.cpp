@@ -21,7 +21,7 @@ int main() {
 	cv::String windowName = "Calibration";	
 	cv::namedWindow(windowName, CV_WINDOW_AUTOSIZE);
 
-	std::cout << "Press enter to capture frame. " << std::endl;
+	std::cout << "Press space to capture frame. " << std::endl;
 	std::cout << "Press 'q' to quit capturing and begin processing. " << std::endl;
 
 	// collect corners
