@@ -1,6 +1,10 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <fstream>
+#include <sstream>
+#include <time.h>
+#include <iomanip>
 #include <opencv2/opencv.hpp>
 
 #define PAT_ROW 7			// number of rows
@@ -8,6 +12,8 @@
 #define CHESS_SIZE 30.0		// [mm]
 
 using uint = unsigned int;
+const char* path_to_log = "./log/";
+const char* path_to_data = "./data/";
 
 int main() {
 	// prepare video capture
@@ -23,6 +29,19 @@ int main() {
 
 	std::cout << "Press space to capture frame. " << std::endl;
 	std::cout << "Press 'q' to quit capturing and begin processing. " << std::endl;
+
+	// get date
+	time_t date;
+	struct tm* timeinfo;
+	char now[20];
+	time(&date);
+	timeinfo = localtime(&date);
+	strftime(now, 20, "%Y%m%d-%H%M%S", timeinfo);
+
+	// create directory to save datas
+	std::ostringstream mkdir;
+	mkdir << "mkdir " << path_to_data << "/" << now;
+	system(mkdir.str().c_str());
 
 	// collect corners
 	cv::Size patt_size(PAT_COL, PAT_ROW);
@@ -57,6 +76,14 @@ int main() {
 		cv::find4QuadCornerSubpix(
 			gray, corners, cv::Size(3, 3));
 		img_points.push_back(corners);
+
+		// save image
+		std::ostringstream filename;
+		filename << path_to_data
+			<< "/" << now << "/"
+			<< cv::format("data%2d.bmp", img_points.size());
+
+		cv::imwrite(filename.str(), frame);
 	}
 
 	if (img_points.size() < 1) {
@@ -89,16 +116,31 @@ int main() {
 		obj_points,
 		img_points,
 		frame.size(),
-		cam_mat,		// camera inner parameter matrix
-		dist_coefs,		// camera distortion coefficients
-		rvecs,			// rotations of camera at each frame
-		tvecs			// translations of camera at each frame
+		cam_mat,		// a camera's inner parameter matrix
+		dist_coefs,		// a camera's distortion coefficients
+		rvecs,			// rotations of the camera at each frame
+		tvecs			// translations of the camera at each frame
 	);
 
-	std::cout << "Camera parameter matrix" << std::endl;
-	std::cout << cam_mat << std::endl;
-	std::cout << "Camera distortion coefficients" << std::endl;
-	std::cout << dist_coefs << std::endl;
+
+	// format result
+	std::ostringstream log_txt;
+	log_txt << "Date : " << now << "\n\n";
+	log_txt << "Camera parameter matrix" << "\n";
+	log_txt << cam_mat << "\n";
+	log_txt << "Camera distortion coefficients" << "\n";
+	log_txt << dist_coefs << "\n";
+
+	// display result
+	std::cout << "\n\n" << std::endl;
+	std::cout << log_txt.str() << std::endl;
+
+	// save result
+	std::ostringstream log_name;
+	log_name << path_to_log << now << ".dat";
+	std::ofstream log_file(log_name.str());
+	log_file << log_txt.str() << std::endl;
+	
 
 	return 0;
 }
