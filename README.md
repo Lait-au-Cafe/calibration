@@ -23,6 +23,8 @@ $ ./calibration
 The chessboard image can be aquired from [here (opencv.jp)](http://opencv.jp/sample/pics/chesspattern_7x10.pdf). 
 If you want to use different chessboard image, please make sure that the defined parameters (PAT_ROW, PAT_SIZE, CHESS_SIZE) are set correctly. 
 
+## Reference
+
 I refered the pages below. 
 
 * [Camera Model in OpenCV](http://opencv.jp/opencv-2.1/cpp/camera_calibration_and_3d_reconstruction.html)
