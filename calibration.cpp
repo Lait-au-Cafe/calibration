@@ -81,7 +81,7 @@ int main() {
 		std::ostringstream filename;
 		filename << path_to_data
 			<< "/" << now << "/"
-			<< cv::format("data%2d.bmp", img_points.size());
+			<< cv::format("data%02d.bmp", img_points.size());
 
 		cv::imwrite(filename.str(), frame);
 	}
