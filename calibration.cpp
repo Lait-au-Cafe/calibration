@@ -15,9 +15,25 @@ using uint = unsigned int;
 const char* path_to_log = "./log/";
 const char* path_to_data = "./data/";
 
-int main() {
+const char* date_format = "%Y%m%d-%H%M%S";
+const char* filename_format = "data%02d.bmp";
+
+int main(int argc, char** argv) {
+	auto use_preset = argc >= 2;
+
+	std::ostringstream path_to_preset;
+	if(use_preset){
+		path_to_preset
+			<< "./data/"
+			<< argv[1]
+			<< "/" << filename_format;
+	}
+
 	// prepare video capture
-	cv::VideoCapture cap(0);
+	cv::VideoCapture cap 
+		= !use_preset ? cv::VideoCapture(0)
+		: cv::VideoCapture(path_to_preset.str());
+
 	if (!cap.isOpened()) {
 		std::cerr << "Cannot open webcam device. " << std::endl;
 		return EXIT_FAILURE;
@@ -36,7 +52,7 @@ int main() {
 	char now[20];
 	time(&date);
 	timeinfo = localtime(&date);
-	strftime(now, 20, "%Y%m%d-%H%M%S", timeinfo);
+	strftime(now, 20, date_format, timeinfo);
 
 	// create directory to save datas
 	std::ostringstream mkdir;
@@ -50,10 +66,13 @@ int main() {
 	int key = -1;
 	cv::Mat frame, gray;
 	while ((key = cv::waitKey(10)) != 'q') {
-		cap >> frame;
+		// aquire a frame
+		if(!(cap.grab() && cap.retrieve(frame))){
+			break;
+		}
 		cv::imshow(windowName, frame);
 		
-		if (key != ' ') {
+		if (!use_preset && key != ' ') {
 			continue;
 		}
 
@@ -77,13 +96,15 @@ int main() {
 			gray, corners, cv::Size(3, 3));
 		img_points.push_back(corners);
 
-		// save image
-		std::ostringstream filename;
-		filename << path_to_data
-			<< "/" << now << "/"
-			<< cv::format("data%02d.bmp", img_points.size());
+		if(!use_preset){
+			// save image
+			std::ostringstream filename;
+			filename << path_to_data
+				<< "/" << now << "/"
+				<< cv::format(filename_format, img_points.size());
 
-		cv::imwrite(filename.str(), frame);
+			cv::imwrite(filename.str(), frame);
+		}
 	}
 
 	if (img_points.size() < 1) {
